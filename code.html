@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Friend Character Stats</title>
+    <style>
+        /* General Styling */
+        :root {
+            --card-bg: #ffffff;
+            --card-border: #e0e0e0;
+            --card-shadow: rgba(0, 0, 0, 0.1);
+            --text-color: #333;
+            --header-color: #2c3e50;
+            --accent-color: #3498db;
+            --stat-label-color: #555;
+            --stat-value-color: #16a085;
+            --bg-color: #f4f7f6;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        h1 {
+            color: var(--header-color);
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        /* Character Grid */
+        #character-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); /* Responsive grid */
+            gap: 25px;
+            width: 100%;
+            max-width: 1200px; /* Limit overall width */
+            justify-content: center;
+        }
+
+        /* Character Card Styling */
+        .character-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 8px var(--card-shadow);
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .character-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px var(--card-shadow);
+        }
+
+        .character-card h2 {
+            color: var(--header-color);
+            margin-top: 0;
+            margin-bottom: 15px;
+            text-align: center;
+            border-bottom: 2px solid var(--accent-color);
+            padding-bottom: 10px;
+        }
+
+        .stats-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            flex-grow: 1; /* Allows list to take available space */
+        }
+
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px dashed var(--card-border);
+        }
+
+        .stat-item:last-child {
+            border-bottom: none;
+        }
+
+        .stat-label {
+            font-weight: bold;
+            color: var(--stat-label-color);
+        }
+
+        .stat-value {
+            font-weight: bold;
+            color: var(--stat-value-color);
+            background-color: #eafaf1; /* Light green background for value */
+            padding: 3px 8px;
+            border-radius: 5px;
+            min-width: 25px; /* Ensure consistent width */
+            text-align: center;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 600px) {
+            body {
+                padding: 10px;
+            }
+            h1 {
+                font-size: 1.8em;
+            }
+            #character-container {
+                gap: 15px;
+            }
+            .character-card {
+                padding: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Friend Character Stats</h1>
+
+    <div id="character-container">
+        <!-- Character cards will be inserted here by JavaScript -->
+    </div>
+
+    <script>
+        // List of friends
+        const friendNames = [
+            "Casey", "Elly", "Westley", "Matt", "Ivah", "Marie",
+            "Hailey", "Alex", "Jules", "Whitney", "Azaya", "Gigi"
+        ];
+
+        // Stat names
+        const statNames = [
+            "Strength", "Dexterity", "Constitution",
+            "Intelligence", "Wisdom", "Charisma"
+        ];
+
+        /**
+         * Generates a random integer between min and max (inclusive).
+         * Simulates rolling 3 six-sided dice (3d6).
+         * @param {number} min - Minimum value (typically 3)
+         * @param {number} max - Maximum value (typically 18)
+         * @returns {number} - Random integer
+         */
+        function generateRandomStat(min = 3, max = 18) {
+            // Simple way: Math.floor(Math.random() * (max - min + 1)) + min;
+            // More accurate 3d6 simulation:
+            let total = 0;
+            for (let i = 0; i < 3; i++) {
+                total += Math.floor(Math.random() * 6) + 1; // Roll 1d6
+            }
+            return total;
+        }
+
+        /**
+         * Creates stats object for a character.
+         * @returns {object} - Object with stat names as keys and random values.
+         */
+        function generateCharacterStats() {
+            const stats = {};
+            statNames.forEach(stat => {
+                stats[stat] = generateRandomStat();
+            });
+            return stats;
+        }
+
+        /**
+         * Creates and appends character cards to the container.
+         */
+        function displayCharacters() {
+            const container = document.getElementById('character-container');
+            if (!container) {
+                console.error("Error: Could not find container element #character-container");
+                return;
+            }
+
+            friendNames.forEach(name => {
+                const stats = generateCharacterStats();
+
+                // Create card element
+                const card = document.createElement('div');
+                card.className = 'character-card';
+
+                // Create name header
+                const nameHeader = document.createElement('h2');
+                nameHeader.textContent = name;
+                card.appendChild(nameHeader);
+
+                // Create stats list
+                const statsList = document.createElement('ul');
+                statsList.className = 'stats-list';
+
+                // Add each stat to the list
+                Object.entries(stats).forEach(([statName, statValue]) => {
+                    const listItem = document.createElement('li');
+                    listItem.className = 'stat-item';
+
+                    const labelSpan = document.createElement('span');
+                    labelSpan.className = 'stat-label';
+                    labelSpan.textContent = `${statName}:`;
+
+                    const valueSpan = document.createElement('span');
+                    valueSpan.className = 'stat-value';
+                    valueSpan.textContent = statValue;
+
+                    listItem.appendChild(labelSpan);
+                    listItem.appendChild(valueSpan);
+                    statsList.appendChild(listItem);
+                });
+
+                card.appendChild(statsList);
+
+                // Append the card to the main container
+                container.appendChild(card);
+            });
+        }
+
+        // --- Script Execution ---
+        // Wait for the DOM to be fully loaded before running the script
+        document.addEventListener('DOMContentLoaded', displayCharacters);
+
+    </script>
+
+</body>
+</html>
