@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Totally Legit Character Profiles</title>
+    <style>
+        /* General Styling */
+        :root {
+            --card-bg: #fff8dc; /* Cornsilk - slightly off-white */
+            --card-border: #f0e68c; /* Khaki */
+            --card-shadow: rgba(100, 50, 0, 0.15);
+            --text-color: #4b3621; /* Saddle brown */
+            --header-color: #8b4513; /* Darker Saddle Brown */
+            --accent-color: #ff6347; /* Tomato */
+            --stat-label-color: #5a403d;
+            --stat-value-color: #2e8b57; /* Sea Green */
+            --bg-color: #faf0e6; /* Linen */
+            --avatar-bg-fallback: #add8e6; /* Light blue */
+            --button-bg: #ff7f50; /* Coral */
+            --button-hover-bg: #ff6347; /* Tomato */
+            --button-text: #ffffff;
+            --reveal-bg: #000000;
+            --reveal-text: #ff0000; /* Changed to Red for more impact */
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.95) translateY(10px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(255, 99, 71, 0.7); } /* Tomato */
+            70% { box-shadow: 0 0 0 10px rgba(255, 99, 71, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(255, 99, 71, 0); }
+        }
+
+        body {
+            font-family: 'Comic Sans MS', cursive, sans-serif; /* The ultimate prank font */
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            box-sizing: border-box;
+            overflow-x: hidden; /* Prevent horizontal scroll */
+        }
+
+        h1 {
+            color: var(--header-color);
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 2em;
+            text-shadow: 1px 1px 2px var(--card-border);
+        }
+
+        #character-viewer {
+            background-color: var(--card-bg);
+            border: 2px dashed var(--card-border);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 5px 5px 15px var(--card-shadow);
+            width: 100%;
+            max-width: 400px; /* Limit width for better focus */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            animation: fadeIn 0.5s ease-out;
+            margin-bottom: 20px;
+            min-height: 450px; /* Ensure space */
+            box-sizing: border-box;
+        }
+
+        /* Area to display the current card */
+        #card-display-area {
+            width: 100%;
+            margin-bottom: 20px;
+            min-height: 350px; /* Reserve space for card content */
+            display: flex; /* Use flex to center content that might appear */
+            justify-content: center;
+            align-items: center;
+        }
+
+        .character-card {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            animation: fadeIn 0.3s ease-in-out; /* Animation for card switch */
+            box-sizing: border-box;
+        }
+
+
+        .avatar {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background-color: var(--avatar-bg-fallback); /* Fallback */
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 2.5em;
+            font-weight: bold;
+            margin-bottom: 15px;
+            border: 4px solid var(--accent-color);
+            box-shadow: 0 0 10px rgba(0,0,0,0.2);
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+            animation: pulse 2s infinite;
+            flex-shrink: 0; /* Prevent avatar from shrinking */
+        }
+
+        .character-card h2 {
+            color: var(--header-color);
+            margin-top: 0;
+            margin-bottom: 15px;
+            text-align: center;
+            border-bottom: 2px dotted var(--accent-color);
+            padding-bottom: 10px;
+            width: 90%; /* Fit inside card */
+        }
+
+        .stats-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            width: 90%; /* Fit inside card */
+        }
+
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 7px 0;
+            border-bottom: 1px dashed var(--card-border);
+        }
+
+        .stat-item:last-child {
+            border-bottom: none;
+        }
+
+        .stat-label {
+            font-weight: bold;
+            color: var(--stat-label-color);
+            font-size: 0.95em;
+        }
+
+        .stat-value {
+            font-weight: bold;
+            color: var(--stat-value-color);
+            background-color: #e0eee0; /* Honeydew - slightly off green */
+            padding: 4px 9px;
+            border-radius: 5px;
+            min-width: 30px; /* Ensure consistent width */
+            text-align: center;
+            font-size: 1.1em;
+        }
+
+        /* Navigation */
+        #navigation-controls {
+            display: flex;
+            justify-content: space-between; /* Space out buttons */
+            width: 100%;
+            max-width: 300px; /* Limit nav width */
+            margin-top: auto; /* Push to bottom if container has extra space */
+        }
+
+        .nav-button {
+            background-color: var(--button-bg);
+            color: var(--button-text);
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.2s ease, transform 0.1s ease;
+            font-family: inherit; /* Use the Comic Sans */
+            box-shadow: 2px 2px 5px rgba(0,0,0,0.2);
+        }
+
+        .nav-button:hover {
+            background-color: var(--button-hover-bg);
+            transform: translateY(-2px);
+        }
+
+        .nav-button:active {
+            transform: translateY(1px);
+        }
+
+        .nav-button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+            opacity: 0.7;
+            transform: none;
+            box-shadow: none;
+        }
+
+        /* April Fools Reveal */
+        #april-fools-reveal {
+            display: none; /* Hidden initially */
+            background-color: var(--reveal-bg);
+            color: var(--reveal-text);
+            border: 5px solid var(--reveal-text);
+            border-radius: 10px;
+            padding: 40px;
+            text-align: center;
+            width: 100%;
+            max-width: 500px;
+            margin: 20px auto;
+            font-family: 'Courier New', Courier, monospace; /* Hacker font */
+            font-size: 1.5em;
+            line-height: 1.6;
+            box-shadow: 0 0 20px var(--reveal-text);
+            animation: fadeIn 1s ease-in;
+        }
+        #april-fools-reveal h2 {
+            margin-top: 0;
+            font-size: 2em;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+        }
+
+        /* Hide elements utility */
+        .hidden {
+            display: none !important; /* Use important to override other display styles if needed */
+        }
+
+         /* Responsive adjustments */
+        @media (max-width: 450px) {
+            body {
+                padding: 10px;
+            }
+            h1 {
+                font-size: 1.5em;
+            }
+             #character-viewer {
+                padding: 15px;
+                min-height: 400px;
+            }
+            .avatar {
+                width: 80px;
+                height: 80px;
+                font-size: 2em;
+            }
+             #navigation-controls {
+                max-width: 90%;
+            }
+            .nav-button {
+                padding: 8px 15px;
+                font-size: 0.9em;
+            }
+            #april-fools-reveal {
+                 font-size: 1.2em;
+                 padding: 20px;
+            }
+        }
+
+    </style>
+</head>
+<body>
+
+    <h1>Your Friends' *Official* Character Profiles</h1>
+
+    <div id="character-viewer">
+        <div id="card-display-area">
+            <!-- Current character card will be injected here -->
+        </div>
+
+        <div id="navigation-controls">
+            <button id="prev-button" class="nav-button">Previous Pal</button>
+            <button id="next-button" class="nav-button">Next Buddy</button>
+        </div>
+    </div>
+
+    <!-- Hidden element for the final reveal - CONTENT UPDATED HERE -->
+    <div id="april-fools-reveal">
+        <h2>Plot Twist!</h2>
+        <p>You scrolled through all those profiles thinking these were your friends?</p>
+        <p><strong>APRIL FOOLS!</strong></p>
+        <p><strong>YOU AREN'T MY FRIENDS!</strong></p>
+        <p>:O</p>
+    </div>
+
+
+    <script>
+        const friendNames = [
+            "Casey", "Elly", "Westley", "Matt", "Ivah", "Marie",
+            "Hailey", "Alex", "Jules", "Whitney", "Azaya", "Gigi"
+        ];
+
+        // April Fools' Stats!
+        const statNames = [
+            "Meme Lordship",       // Strength
+            "Snackquisition Speed",// Dexterity
+            "Nap Endurance",       // Constitution
+            "Obscure Trivia",      // Intelligence
+            "Gut Feeling",         // Wisdom
+            "Awkward Banter"       // Charisma
+        ];
+
+        let charactersData = []; // Will hold the generated character card HTML elements
+        let currentIndex = 0;
+        let aprilFoolsTriggered = false;
+
+        // --- DOM Elements ---
+        let cardDisplayArea = null;
+        let prevButton = null;
+        let nextButton = null;
+        let characterViewer = null;
+        let aprilFoolsReveal = null;
+
+
+        /**
+         * Generates a random integer, sometimes going a bit wild for fun.
+         * Simulates rolling 3d6-ish, but with April Fools' flavor.
+         * @returns {number} - Random-ish integer
+         */
+        function generateAbsurdStat() {
+            let total = 0;
+            for (let i = 0; i < 3; i++) {
+                total += Math.floor(Math.random() * 6) + 1; // Roll 1d6
+            }
+            // 1 in 10 chance of a slightly absurd value
+            if (Math.random() < 0.1) {
+                total += Math.floor(Math.random() * 6) - 3; // Add -3 to +2
+            }
+             // 1 in 20 chance of a *very* absurd value
+            if (Math.random() < 0.05) {
+                total = Math.random() < 0.5 ? Math.floor(Math.random() * 5) : Math.floor(Math.random() * 10) + 18; // Either very low or very high
+            }
+            return Math.max(1, Math.min(total, 25)); // Keep it somewhat contained (1-25)
+        }
+
+        /**
+         * Generates "stats" object for a character.
+         * @returns {object} - Object with absurd stat names as keys and random values.
+         */
+        function generateCharacterStats() {
+            const stats = {};
+            statNames.forEach(stat => {
+                stats[stat] = generateAbsurdStat();
+            });
+            return stats;
+        }
+
+        /**
+         * Gets initials from a name.
+         * @param {string} name - The full name.
+         * @returns {string} - The initials (e.g., "JD" for "John Doe").
+         */
+        function getInitials(name) {
+            if (!name) return "?";
+            const parts = name.trim().split(' ');
+            if (parts.length === 1) {
+                return parts[0].substring(0, 2).toUpperCase();
+            }
+            return (parts[0][0] + (parts.length > 1 ? parts[parts.length - 1][0] : '')).toUpperCase();
+        }
+
+        /**
+         * Generates a random HSL color string for avatars.
+         * Ensures somewhat pleasant, non-greyish colors.
+          * @returns {string} - HSL color string like 'hsl(120, 70%, 50%)'
+         */
+        function getRandomColor() {
+            const hue = Math.floor(Math.random() * 360);
+            const saturation = Math.floor(Math.random() * 30) + 70; // 70-100% saturation
+            const lightness = Math.floor(Math.random() * 20) + 40; // 40-60% lightness
+            return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
+        }
+
+
+        /**
+         * Creates and stores the HTML element for a single character card.
+         * @param {string} name - Friend's name.
+         * @param {number} index - The index of the friend in the array.
+         * @returns {HTMLElement} - The generated card div element.
+         */
+        function createCharacterCardElement(name, index) {
+            const stats = generateCharacterStats();
+            const initials = getInitials(name);
+            const avatarColor = getRandomColor();
+
+            // Create card element
+            const card = document.createElement('div');
+            card.className = 'character-card';
+            card.setAttribute('data-index', index); // Store index for reference if needed
+
+            // Create avatar
+            const avatar = document.createElement('div');
+            avatar.className = 'avatar';
+            avatar.textContent = initials;
+            avatar.style.backgroundColor = avatarColor; // Assign unique color
+            card.appendChild(avatar);
+
+            // Create name header
+            const nameHeader = document.createElement('h2');
+            nameHeader.textContent = name;
+            card.appendChild(nameHeader);
+
+            // Create stats list
+            const statsList = document.createElement('ul');
+            statsList.className = 'stats-list';
+
+            // Add each stat to the list
+            Object.entries(stats).forEach(([statName, statValue]) => {
+                const listItem = document.createElement('li');
+                listItem.className = 'stat-item';
+
+                const labelSpan = document.createElement('span');
+                labelSpan.className = 'stat-label';
+                labelSpan.textContent = `${statName}:`;
+
+                const valueSpan = document.createElement('span');
+                valueSpan.className = 'stat-value';
+                valueSpan.textContent = statValue;
+
+                listItem.appendChild(labelSpan);
+                listItem.appendChild(valueSpan);
+                statsList.appendChild(listItem);
+            });
+
+            card.appendChild(statsList);
+            return card;
+        }
+
+        /**
+         * Displays the character card for the given index.
+         * @param {number} index - The index of the character to display.
+         */
+        function showCharacter(index) {
+            if (!cardDisplayArea || index < 0 || index >= charactersData.length) {
+                 console.error("Invalid index or display area not found.");
+                 return;
+            }
+
+            // Clear previous card
+            cardDisplayArea.innerHTML = '';
+
+            // Append a clone of the stored card element
+            const cardToShow = charactersData[index].cloneNode(true);
+            cardDisplayArea.appendChild(cardToShow);
+
+            // Update button states
+            prevButton.disabled = (index === 0);
+            nextButton.disabled = aprilFoolsTriggered || (index === charactersData.length - 1 && !aprilFoolsTriggered); // Disable if last *unless* AF is pending
+
+             // Special case for the "Next" button on the last item BEFORE the prank
+            if (index === charactersData.length - 1 && !aprilFoolsTriggered) {
+                 nextButton.textContent = "Wait, What's This?";
+                 nextButton.disabled = false; // Ensure it's clickable to trigger the prank
+             } else if (!aprilFoolsTriggered) {
+                 nextButton.textContent = "Next Buddy"; // Reset text if not the last item
+             }
+        }
+
+        /**
+         * Handles the "Next" button click.
+         */
+        function nextCharacter() {
+            if (currentIndex === charactersData.length - 1 && !aprilFoolsTriggered) {
+                triggerAprilFools();
+            }
+            else if (currentIndex < charactersData.length - 1 && !aprilFoolsTriggered) {
+                currentIndex++;
+                showCharacter(currentIndex);
+            }
+             else if (aprilFoolsTriggered) {
+                console.log("April Fools already triggered!");
+             }
+        }
+
+        /**
+         * Handles the "Previous" button click.
+         */
+        function prevCharacter() {
+            if (currentIndex > 0 && !aprilFoolsTriggered) { // Can't go back if pranked
+                currentIndex--;
+                if (currentIndex === charactersData.length - 2) {
+                    nextButton.textContent = "Next Buddy";
+                }
+                showCharacter(currentIndex);
+            }
+        }
+
+        /**
+        * Triggers the April Fools' reveal.
+        */
+        function triggerAprilFools() {
+            aprilFoolsTriggered = true;
+            characterViewer.classList.add('hidden'); // Hide the normal viewer
+            aprilFoolsReveal.style.display = 'block'; // Show the reveal message
+            const mainTitle = document.querySelector('h1');
+            if(mainTitle) mainTitle.classList.add('hidden');
+        }
+
+
+        /**
+         * Initializes the character viewer.
+         */
+        function initializeViewer() {
+            // Get DOM elements after page load
+            cardDisplayArea = document.getElementById('card-display-area');
+            prevButton = document.getElementById('prev-button');
+            nextButton = document.getElementById('next-button');
+            characterViewer = document.getElementById('character-viewer');
+            aprilFoolsReveal = document.getElementById('april-fools-reveal');
+
+            if (!cardDisplayArea || !prevButton || !nextButton || !characterViewer || !aprilFoolsReveal) {
+                console.error("Initialization failed: One or more essential elements not found.");
+                return; // Stop if essential elements are missing
+            }
+
+            // Generate and store all character card elements
+            charactersData = friendNames.map((name, index) => createCharacterCardElement(name, index));
+
+            // Set initial state
+            currentIndex = 0;
+            aprilFoolsTriggered = false; // Ensure reset on load
+            showCharacter(currentIndex); // Display the first character
+
+            // Add event listeners
+            prevButton.addEventListener('click', prevCharacter);
+            nextButton.addEventListener('click', nextCharacter);
+
+            console.log("Character viewer initialized. Happy April Fools'!");
+        }
+
+        // --- Script Execution ---
+        // Wait for the DOM to be fully loaded before running the script
+        document.addEventListener('DOMContentLoaded', initializeViewer);
+
+    </script>
+
+</body>
+</html>
